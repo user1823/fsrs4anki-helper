@@ -1,19 +1,21 @@
 import json
 import math
 import time
-from anki.decks import DeckManager
-from aqt.utils import askUser
-from typing import List
-from anki.stats_pb2 import CardStatsResponse
-from anki.cards import Card
-from anki.stats import (
-    REVLOG_LRN,
-    REVLOG_REV,
-    REVLOG_RELRN,
-    REVLOG_CRAM,
-)
-from aqt import mw
 from datetime import date, datetime, timedelta
+from typing import List
+
+import numpy as np
+from anki.cards import Card
+from anki.decks import DeckManager
+from anki.stats import (
+    REVLOG_CRAM,
+    REVLOG_LRN,
+    REVLOG_RELRN,
+    REVLOG_REV,
+)
+from anki.stats_pb2 import CardStatsResponse
+from aqt import mw
+from aqt.utils import askUser
 
 
 def RepresentsInt(s):
@@ -173,10 +175,23 @@ def sched_current_date() -> date:
 
 DECAY = -0.2
 
+ADR_FLAT = 2.15
+ADR_S_MULTI = 0.135
+ADR_D_MULTI = -0.085
+
 
 def power_forgetting_curve(t, s, decay=DECAY):
     factor = 0.9 ** (1 / decay) - 1
     return (1 + factor * t / s) ** decay
+
+
+def sigmoid(x):
+    return 1.0 / (1.0 + np.exp(-x))
+
+
+def adr_dr(s, d):
+    logit = ADR_FLAT + ADR_S_MULTI * np.log(s) + ADR_D_MULTI * d
+    return sigmoid(logit)
 
 
 def next_interval(s, r, decay=DECAY):

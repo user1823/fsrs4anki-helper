@@ -238,8 +238,8 @@ class FSRS:
         )
         return best_ivl
 
-    def fuzzed_next_interval(self, stability, decay):
-        new_interval = next_interval(stability, self.desired_retention, decay)
+    def fuzzed_next_interval(self, stability, dr, decay):
+        new_interval = next_interval(stability, dr, decay)
         return self.apply_fuzz(new_interval)
 
     def set_card(self, card: Card):
@@ -462,14 +462,15 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
     if card.type == CARD_TYPE_REV:
         fsrs.set_card(card)
         fsrs.set_fuzz_factor(cid, card.reps)
-        decay = get_decay(card)
+        decay = 0.3984  # hard-coded because I believe that FSRS hasn't learnt the actual delay for some of my decks yet
+        adr = adr_dr(s, d)
         card.desired_retention = fsrs.desired_retention
         due_before = card.odue if card.odid else card.due
 
         if fsrs.reschedule_threshold > 0 and not (
             fsrs.apply_easy_days or auto_reschedule
         ):
-            dr = fsrs.desired_retention
+            dr = adr  # was fsrs.desired_retention
             odds = dr / (1 - dr)
 
             odds_lower = (1 - fsrs.reschedule_threshold) * odds
@@ -491,7 +492,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
                 else:
                     return None, False
 
-        new_ivl = fsrs.fuzzed_next_interval(s, -decay)
+        new_ivl = fsrs.fuzzed_next_interval(s, adr, -decay)
         card = update_card_due_ivl(card, new_ivl)
         write_custom_data(card, "v", "reschedule")
         due_after = card.odue if card.odid else card.due
