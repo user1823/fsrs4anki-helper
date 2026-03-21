@@ -1,31 +1,32 @@
 from pathlib import Path
-from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
-from aqt import mw
-from aqt.qt import QAction, QDesktopServices, QUrl
-from aqt.utils import openLink, askUser
 from typing import Callable
 
-from .utils import get_dr
+from aqt import mw
+from aqt.gui_hooks import deck_browser_will_show_options_menu, state_did_change
+from aqt.qt import QAction, QDesktopServices, QUrl
+from aqt.utils import askUser, openLink
 
-from .dsr_state import init_dsr_status_hook
-from .sync_hook import init_sync_hook
-from .schedule.reschedule import reschedule
-from .schedule.postpone import postpone
-from .schedule.advance import advance
-from .schedule.flatten import flatten
-from .schedule.reset import clear_custom_data, clear_manual_rescheduling
-from .schedule.disperse_siblings import disperse_siblings
-from .schedule.schedule_break import schedule_break
-from .schedule.easy_days import (
-    easy_days,
-    easy_day_for_sepcific_date,
-)
-from .schedule.remedy import remedy_hard_misuse, undo_remedy
-from .schedule import init_review_hook
-from .stats import init_stats
 from .browser.browser import init_browser
 from .configuration import Config, run_on_configuration_change
+from .dsr_state import init_dsr_status_hook
 from .i18n import t
+from .schedule import init_review_hook
+from .schedule.advance import advance
+from .schedule.disperse_siblings import disperse_siblings
+from .schedule.easy_days import (
+    easy_day_for_sepcific_date,
+    easy_days,
+)
+from .schedule.flatten import flatten
+from .schedule.postpone import postpone
+from .schedule.remedy import remedy_hard_misuse, undo_remedy
+from .schedule.reschedule import reschedule
+from .schedule.reset import clear_custom_data, clear_manual_rescheduling
+from .schedule.save_adr_dr import save_adr_dr_in_cards
+from .schedule.schedule_break import schedule_break
+from .stats import init_stats
+from .sync_hook import init_sync_hook
+from .utils import get_dr
 
 """
 Acknowledgement to Arthur Milchior, Carlos Duarte and oakkitten.
@@ -169,6 +170,8 @@ add_action_to_gear(
     t("reschedule-recent-cards", count=config.days_to_reschedule),
 )
 
+menu_adr_dr = build_action(save_adr_dr_in_cards, "Save ADR_DR in cards")
+
 menu_schedule_break = build_action(schedule_break, t("schedule-break-menu"))
 add_action_to_gear(schedule_break, t("schedule-break-menu"))
 
@@ -279,6 +282,7 @@ menu_for_easy_days = menu_for_helper.addMenu(t("less-anki-easy-days"))
 menu_for_helper.addSeparator()
 menu_for_helper.addAction(menu_reschedule)
 menu_for_helper.addAction(menu_reschedule_recent)
+menu_for_helper.addAction(menu_adr_dr)
 menu_for_helper.addAction(menu_schedule_break)
 menu_for_helper.addAction(menu_postpone)
 menu_for_helper.addAction(menu_advance)

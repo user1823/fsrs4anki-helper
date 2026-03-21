@@ -8,6 +8,7 @@ from .configuration import Config
 from .i18n import t
 from .schedule.disperse_siblings import disperse_siblings
 from .schedule.reschedule import reschedule
+from .schedule.save_adr_dr import save_adr_dr_in_cards
 from .utils import *
 
 
@@ -91,6 +92,14 @@ def auto_disperse(remote_reviewed_cids: List[int], texts: List[str]) -> bool:
         """)
     ]
     remote_reviewed_nid_string = ids2str(remote_reviewed_nids)
+
+    adr_fut = save_adr_dr_in_cards(
+        filter_flag=True,
+        filtered_cids=set(remote_reviewed_cids),
+    )
+
+    if adr_fut:
+        adr_fut.result()  # wait for ADR_DR to be saved before dispersing
 
     fut = disperse_siblings(
         None,
