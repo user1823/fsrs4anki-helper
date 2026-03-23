@@ -179,6 +179,8 @@ ADR_FLAT = 2.15
 ADR_S_MULTI = 0.135
 ADR_D_MULTI = -0.085
 
+MAX_TARGET_DR = 0.94
+
 
 def power_forgetting_curve(t, s, decay=DECAY):
     factor = 0.9 ** (1 / decay) - 1
@@ -186,12 +188,17 @@ def power_forgetting_curve(t, s, decay=DECAY):
 
 
 def sigmoid(x):
-    return 1.0 / (1.0 + np.exp(-x))
+    xc = np.clip(x, -10.0, 10.0)
+    return 1.0 / (1.0 + np.exp(-xc))
+
+
+def safe_ln(x):
+    return np.log(np.maximum(x, 1e-12))
 
 
 def adr_dr(s, d):
-    logit = ADR_FLAT + ADR_S_MULTI * np.log(s) + ADR_D_MULTI * d
-    return sigmoid(logit)
+    logit = ADR_FLAT + ADR_S_MULTI * safe_ln(s) + ADR_D_MULTI * d
+    return np.clip(sigmoid(logit), 0, MAX_TARGET_DR)
 
 
 def next_interval(s, r, decay=DECAY):
