@@ -81,6 +81,14 @@ def get_last_review_date_and_interval(card: Card):
     return last_review_date, last_interval
 
 
+def get_last_review_date(card: Card):
+    last_review_date = (
+        math.ceil((card.last_review_time - mw.col.sched.day_cutoff) / 86400)
+        + mw.col.sched.today
+    )
+    return last_review_date
+
+
 def update_card_due_ivl(card: Card, new_ivl: int):
     new_ivl = max(new_ivl, 1)
     card.ivl = new_ivl
