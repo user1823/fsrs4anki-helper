@@ -464,7 +464,7 @@ def reschedule_card(cid, fsrs: FSRS, recompute=False, auto_reschedule=False):
         fsrs.set_fuzz_factor(cid, card.reps)
         decay = 0.3984  # hard-coded because I believe that FSRS hasn't learnt the actual delay for some of my decks yet
         adr = adr_dr(s, d)
-        card.desired_retention = round(adr, 2)
+        card.desired_retention = fsrs.desired_retention
         due_before = card.odue if card.odid else card.due
 
         if fsrs.reschedule_threshold > 0 and not (
