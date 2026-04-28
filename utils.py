@@ -4,7 +4,6 @@ import time
 from datetime import date, datetime, timedelta
 from typing import List
 
-import numpy as np
 from anki.cards import Card
 from anki.decks import DeckManager
 from anki.stats import (
@@ -188,17 +187,20 @@ def power_forgetting_curve(t, s, decay=DECAY):
 
 
 def sigmoid(x):
-    xc = np.clip(x, -10.0, 10.0)
-    return 1.0 / (1.0 + np.exp(-xc))
+    # clip x to [-10, 10]
+    xc = max(-10.0, min(10.0, x))
+    return 1.0 / (1.0 + math.exp(-xc))
 
 
 def safe_ln(x):
-    return np.log(np.maximum(x, 1e-12))
+    # ensure x >= 1e-12
+    return math.log(max(x, 1e-12))
 
 
 def adr_dr(s, d):
     logit = ADR_FLAT + ADR_S_MULTI * safe_ln(s) + ADR_D_MULTI * d
-    return np.clip(sigmoid(logit), 0, MAX_TARGET_DR)
+    # clip result to [0, MAX_TARGET_DR]
+    return max(0.0, min(sigmoid(logit), MAX_TARGET_DR))
 
 
 def next_interval(s, r, decay=DECAY):
