@@ -247,6 +247,21 @@ def export_dataset(did=None):
 menu_export_dataset = build_action(export_dataset, t("export-dataset"))
 
 
+def export_dataset_by_preset(did=None):
+    addon = mw.addonManager.addonFromModule(__name__)
+    user_files = Path(mw.addonManager.addonsFolder(addon)) / "user_files"
+    user_files.mkdir(parents=True, exist_ok=True)
+    preset_dir = user_files / f"{mw.pm.name}_by_preset"
+    preset_dir.mkdir(parents=True, exist_ok=True)
+    mw.col.export_dataset_for_research_by_preset(str(preset_dir))
+    QDesktopServices.openUrl(QUrl.fromLocalFile(str(preset_dir.absolute())))
+
+
+menu_export_dataset_by_preset = build_action(
+    export_dataset_by_preset, "Export Dataset by Preset for Research"
+)
+
+
 def pass_fail(did=None):
     openLink("https://ankiweb.net/shared/info/876946123")
 
@@ -300,6 +315,7 @@ menu_for_helper.addAction(menu_visualize)
 if not config.has_rated:
     menu_for_helper.addAction(menu_rate)
 menu_for_helper.addAction(menu_export_dataset)
+menu_for_helper.addAction(menu_export_dataset_by_preset)
 menu_for_helper.addSeparator()
 menu_for_recommended_addons = menu_for_helper.addMenu(t("recommended-addons"))
 menu_for_recommended_addons.addAction(menu_pass_fail)
