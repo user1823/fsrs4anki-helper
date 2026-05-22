@@ -178,6 +178,7 @@ ADR_FLAT = 2.15
 ADR_S_MULTI = 0.135
 ADR_D_MULTI = -0.085
 
+MIN_TARGET_DR = 0.82
 MAX_TARGET_DR = 0.94
 
 
@@ -199,8 +200,8 @@ def safe_ln(x):
 
 def adr_dr(s, d):
     logit = ADR_FLAT + ADR_S_MULTI * safe_ln(s) + ADR_D_MULTI * d
-    # clip result to [0, MAX_TARGET_DR]
-    return max(0.0, min(sigmoid(logit), MAX_TARGET_DR))
+    # clip result to [MIN_TARGET_DR, MAX_TARGET_DR]
+    return max(MIN_TARGET_DR, min(sigmoid(logit), MAX_TARGET_DR))
 
 
 def next_interval(s, r, decay=DECAY):
