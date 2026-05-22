@@ -181,6 +181,11 @@ ADR_D_MULTI = -0.085
 MIN_TARGET_DR = 0.82
 MAX_TARGET_DR = 0.94
 
+# Deck-specific ADR overrides. Only list keys you want to change.
+DECK_ADR_CONFIGS = {
+    1234567890: {"ADR_D_MULTI": -0.075},  # sample
+}
+
 
 def power_forgetting_curve(t, s, decay=DECAY):
     factor = 0.9 ** (1 / decay) - 1
@@ -198,10 +203,16 @@ def safe_ln(x):
     return math.log(max(x, 1e-12))
 
 
-def adr_dr(s, d):
-    logit = ADR_FLAT + ADR_S_MULTI * safe_ln(s) + ADR_D_MULTI * d
+def adr_dr(s, d, did=None):
+    cfg = DECK_ADR_CONFIGS.get(did, {}) if did is not None else {}
+    flat = cfg.get("ADR_FLAT", ADR_FLAT)
+    s_multi = cfg.get("ADR_S_MULTI", ADR_S_MULTI)
+    d_multi = cfg.get("ADR_D_MULTI", ADR_D_MULTI)
+    min_dr = cfg.get("MIN_TARGET_DR", MIN_TARGET_DR)
+    max_dr = cfg.get("MAX_TARGET_DR", MAX_TARGET_DR)
+    logit = flat + s_multi * safe_ln(s) + d_multi * d
     # clip result to [MIN_TARGET_DR, MAX_TARGET_DR]
-    return max(MIN_TARGET_DR, min(sigmoid(logit), MAX_TARGET_DR))
+    return max(min_dr, min(sigmoid(logit), max_dr))
 
 
 def next_interval(s, r, decay=DECAY):
